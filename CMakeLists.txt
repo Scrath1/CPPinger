@@ -3,16 +3,34 @@ project(Ping_test)
 
 find_package(Threads)
 
-set(CMAKE_CXX_STANDARD 23)
+#set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_EXTENSIONS 23)
 
 add_executable(Ping_test main.cpp icmplib/icmplib.h)
-target_link_libraries( Ping_test ${CMAKE_THREAD_LIBS_INIT})
 
-include(FetchContent)
-if (NOT channel_POPULATED)
-    FetchContent_Declare(channel URL https://github.com/andreiavrammsd/cpp-channel/archive/v0.7.0.zip)
-    FetchContent_Populate(channel)
-    include_directories(${channel_SOURCE_DIR}/include)
-    # OR
-    # add_subdirectory(${channel_SOURCE_DIR}/)
-endif ()
+# add dependencies
+include(cmake/CPM.cmake)
+CPMAddPackage(
+        NAME yaml-cpp
+        GITHUB_REPOSITORY jbeder/yaml-cpp
+        GIT_TAG origin/master
+        VERSION 0.7.0
+)
+if(yaml-cpp_ADDED)
+#    add_library(yaml-cpp INTERFACE)
+    target_include_directories(yaml-cpp INTERFACE ${yaml-cpp_SOURCE_DIR})
+endif()
+CPMAddPackage(
+        NAME cpp-channel
+        GITHUB_REPOSITORY andreiavrammsd/cpp-channel
+        VERSION 0.7.0
+)
+if(cpp-channel_ADDED)
+    add_library(cpp-channel INTERFACE)
+    target_include_directories(cpp-channel INTERFACE ${cpp-channel_SOURCE_DIR})
+endif()
+
+target_link_libraries( Ping_test
+        ${CMAKE_THREAD_LIBS_INIT}
+        cpp-channel
+        yaml-cpp)

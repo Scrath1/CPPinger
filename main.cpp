@@ -1,9 +1,8 @@
 #include <iostream>
 #include <csignal>
 #include <thread>
+#include "include/msd/channel.hpp"
 #include "icmplib/icmplib.h"
-#include "msd/channel.hpp"
-
 
 using p_chan = msd::channel<icmplib::PingResult>;
 bool stop = false;
