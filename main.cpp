@@ -3,6 +3,7 @@
 #include <thread>
 #include "include/msd/channel.hpp"
 #include "icmplib/icmplib.h"
+#include "yaml-cpp/yaml.h"
 
 using p_chan = msd::channel<icmplib::PingResult>;
 bool stop = false;
@@ -20,23 +21,29 @@ void event_handling(p_chan& in){
     }
 }
 
-void continuous_ping(p_chan& out){
+void continuous_ping(p_chan& out, const std::string& target,const int& interval = 5){
+    icmplib::IPAddress t = icmplib::IPAddress(target);
+    std::cout << "Starting to ping target " << target << " with interval " << interval << std::endl;
     while (!stop){
-        icmplib::IPAddress target = icmplib::IPAddress("192.168.1.1");
-        icmplib::PingResult result = icmplib::Ping(target);
+        icmplib::PingResult result = icmplib::Ping(t);
         result >> out;
-        sleep(1);
+        sleep(interval);
     }
     out.close();
 }
 
 int main() {
+    YAML::Node config = YAML::LoadFile("config.yml");
+
+    int pingInterval = config["interval"].as<int>();
+    std::string target = config["target"].as<std::string>();
+
     std::vector<std::thread> threads;
     signal(SIGINT, sigint_handler);
-    p_chan pingresults;
+    p_chan pingResults;
 
-    threads.emplace_back(&continuous_ping,std::ref(pingresults));
-    threads.emplace_back(std::thread(&event_handling, std::ref(pingresults)));
+    threads.emplace_back(&continuous_ping, std::ref(pingResults), std::ref(target), std::ref(pingInterval));
+    threads.emplace_back(std::thread(&event_handling, std::ref(pingResults)));
 
     for(std::thread& t: threads){
         t.join();
