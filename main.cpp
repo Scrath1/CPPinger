@@ -9,7 +9,7 @@ using p_chan = msd::channel<icmplib::PingResult>;
 bool stop = false;
 
 void sigint_handler(int signum){
-    std::cout << "Caught signal " << signum << std::endl;
+    std::cout << "Caught stop signal" << std::endl;
     stop=true;
 }
 
@@ -28,16 +28,16 @@ void continuous_ping(p_chan& out){
         result >> out;
         sleep(1);
     }
+    out.close();
 }
 
 int main() {
+    std::vector<std::thread> threads;
     signal(SIGINT, sigint_handler);
     p_chan pingresults;
 
-    std::thread threads[] = {
-            std::thread(&continuous_ping,std::ref(pingresults)),
-            std::thread(&event_handling, std::ref(pingresults))
-    };
+    threads.emplace_back(&continuous_ping,std::ref(pingresults));
+    threads.emplace_back(std::thread(&event_handling, std::ref(pingresults)));
 
     for(std::thread& t: threads){
         t.join();

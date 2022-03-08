@@ -1,2 +1,8 @@
 /cmake-build-debug/
+/CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
 .idea/
+_deps/
+Ping_test
