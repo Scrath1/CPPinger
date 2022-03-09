@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.21)
-project(Ping_test)
+project(CPPinger)
 
 find_package(Threads)
 
 #set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_EXTENSIONS 23)
+set(CMAKE_CXX_EXTENSIONS 11)
 
-add_executable(Ping_test src/main.cpp src/icmplib/icmplib.h src/Logger/Logger.cpp src/Logger/Logger.h src/Logger/LogLevels.h)
+add_executable(CPPinger src/main.cpp src/icmplib/icmplib.h src/Logger/Logger.cpp src/Logger/Logger.h src/Logger/LogLevels.h)
 
 # add dependencies
 include(cmake/CPM.cmake)
@@ -30,7 +30,7 @@ if(cpp-channel_ADDED)
     target_include_directories(cpp-channel INTERFACE ${cpp-channel_SOURCE_DIR})
 endif()
 
-target_link_libraries( Ping_test
+target_link_libraries( CPPinger
         ${CMAKE_THREAD_LIBS_INIT}
         cpp-channel
         yaml-cpp)
