@@ -1,0 +1,9 @@
+version: '3'
+services:
+  cppinger:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - ./config.yml:/app/config.yml
+      - ./logfile.log:/app/logfile.log
