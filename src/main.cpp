@@ -6,14 +6,36 @@
 #include "yaml-cpp/yaml.h"
 #include "Logger/Logger.h"
 
-using p_chan = msd::channel<icmplib::PingResult>;
-bool stop = false;
 
-static const std::string ResponseStrings[] = {"Success","Unreachable","TimeExceeded","Timeout","Unsupported","Failure"};
+using p_chan = msd::channel<icmplib::PingResult>;
+void event_handling(p_chan& in, int pingWarningThreshold);
+
+
+struct PingTarget{
+    std::string address;
+    int interval;
+    std::thread eventHandler;
+    p_chan channel;
+
+    PingTarget(std::string address,int interval, int pingWarningThreshold)
+    : interval(interval), address(address)
+    {
+        eventHandler = std::thread(&event_handling, std::ref(channel), std::ref(pingWarningThreshold));
+    }
+//    PingTarget(const PingTarget&) = delete;
+//    PingTarget(PingTarget&&) = default;
+};
+
+
+bool stop = false;
+std::vector<PingTarget> targets;
+
+const std::string ResponseStrings[] = {"Success","Unreachable","TimeExceeded","Timeout","Unsupported","Failure"};
 
 std::string responseToString(icmplib::PingResponseType response){
     return ResponseStrings[static_cast<int>(response)];
 }
+
 
 void sigint_handler(int signum){
     std::cout << "Caught stop signal" << std::endl;
@@ -64,6 +86,18 @@ void continuous_ping(p_chan& out, const std::string& target,const int& interval 
     out.close();
 }
 
+void parseTargets(YAML::Node targetsNode){
+    Logger* logger = Logger::getInstance();
+    for(YAML::const_iterator it=targetsNode.begin();it!=targetsNode.end();++it){
+        std::string address = it->operator[]("address").as<std::string>();
+        int interval = it->operator[]("interval").as<int>();
+        int threshold = it->operator[]("pingwarning_threshold").as<int>();
+        // TODO: Fix this error
+//        targets.emplace_back(address,interval,threshold);
+        logger->log(LogLevel::logINFO,"Parsed target: " + address, EventType::SetupInformation);
+    }
+}
+
 int main() {
     YAML::Node config = YAML::LoadFile("config.yml");
 
@@ -71,6 +105,9 @@ int main() {
     std::string target = config["target"].as<std::string>();
     std::string logfileName = config["logfile_name"].as<std::string>();
     int pingWarningThreshold = config["pingwarning_threshold"].as<int>();
+
+    YAML::Node yamlTargets = config["targets"];
+    parseTargets(yamlTargets);
 
     Logger::setFileTarget(logfileName);
     Logger* logger = Logger::getInstance();
