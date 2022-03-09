@@ -6,3 +6,4 @@ Makefile
 .idea/
 _deps/
 Ping_test
+*.log

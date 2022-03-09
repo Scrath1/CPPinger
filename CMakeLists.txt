@@ -6,7 +6,7 @@ find_package(Threads)
 #set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_EXTENSIONS 23)
 
-add_executable(Ping_test main.cpp icmplib/icmplib.h)
+add_executable(Ping_test src/main.cpp src/icmplib/icmplib.h src/Logger/Logger.cpp src/Logger/Logger.h src/Logger/LogLevels.h)
 
 # add dependencies
 include(cmake/CPM.cmake)

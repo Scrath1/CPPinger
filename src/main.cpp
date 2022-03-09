@@ -4,6 +4,7 @@
 #include "include/msd/channel.hpp"
 #include "icmplib/icmplib.h"
 #include "yaml-cpp/yaml.h"
+#include "Logger/Logger.h"
 
 using p_chan = msd::channel<icmplib::PingResult>;
 bool stop = false;
@@ -37,6 +38,12 @@ int main() {
 
     int pingInterval = config["interval"].as<int>();
     std::string target = config["target"].as<std::string>();
+    std::string logfileName = config["logfile_name"].as<std::string>();
+
+    Logger::setFileTarget(logfileName);
+    Logger* logger = Logger::getInstance();
+
+    logger->log(LogLevel::logINFO, "Started logging");
 
     std::vector<std::thread> threads;
     signal(SIGINT, sigint_handler);
