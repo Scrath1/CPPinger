@@ -4,9 +4,9 @@ project(CPPinger)
 find_package(Threads)
 
 #set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_EXTENSIONS 11)
+set(CMAKE_CXX_EXTENSIONS 23)
 
-add_executable(CPPinger src/main.cpp src/icmplib/icmplib.h src/Logger/Logger.cpp src/Logger/Logger.h src/Logger/LogLevels.h)
+add_executable(CPPinger src/main.cpp src/icmplib/icmplib.h src/Logger/Logger.cpp src/Logger/Logger.h src/Logger/LogLevels.h src/PingTarget.cpp src/PingTarget.h)
 
 # add dependencies
 include(cmake/CPM.cmake)
