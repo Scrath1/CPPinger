@@ -2,6 +2,8 @@
 #define CPPINGER_PINGTARGET_H
 #include <string>
 #include <thread>
+#include "Logger/Logger.h"
+#include "Logger/LogLevels.h"
 #include "include/msd/channel.hpp"
 #include "icmplib/icmplib.h"
 

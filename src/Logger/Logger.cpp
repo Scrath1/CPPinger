@@ -1,6 +1,4 @@
 #include "Logger.h"
-#include <iomanip>
-#include <ctime>
 
 Logger* Logger::instance = nullptr;
 std::string Logger::filename;

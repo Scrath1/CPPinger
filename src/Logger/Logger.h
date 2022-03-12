@@ -3,6 +3,8 @@
 #include "LogLevels.h"
 #include <iostream>
 #include <fstream>
+#include <iomanip>
+#include <ctime>
 
 class Logger {
 public:

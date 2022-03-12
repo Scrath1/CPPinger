@@ -1,8 +1,5 @@
 #include "PingTarget.h"
 
-#include <utility>
-#include "Logger/Logger.h"
-#include "Logger/LogLevels.h"
 
 const std::string ResponseStrings[] = {"Success","Unreachable","TimeExceeded","Timeout","Unsupported","Failure"};
 

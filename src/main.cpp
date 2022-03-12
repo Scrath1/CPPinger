@@ -36,7 +36,7 @@ void parseTargets(YAML::Node targetsNode){
         int interval = it->operator[]("interval").as<int>();
         int threshold = it->operator[]("pingwarning_threshold").as<int>();
         // TODO: Fix this error
-        targets.emplace_back(address,interval,threshold);
+//        targets.emplace_back(address,interval,threshold);
         logger->log(LogLevel::logINFO,"Parsed target: " + address, EventType::SetupInformation);
     }
 }
