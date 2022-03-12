@@ -11,7 +11,8 @@ std::string responseToString(icmplib::PingResponseType response){
 PingTarget::PingTarget(std::string address, int interval, int pingWarningThreshold)
 : address(std::move(address)), interval(interval), pingWarningThreshold(pingWarningThreshold), eventHandler(std::thread(&PingTarget::eventHandling, this))
 {
-
+    sem_init(&queueSem, 0, 0);
+    sem_init(&pushLock, 0, 1);
 }
 
 void PingTarget::eventHandling() {
@@ -19,9 +20,16 @@ void PingTarget::eventHandling() {
     icmplib::PingResponseType lastResponse = icmplib::PingResponseType::Success;
 
     Logger* logger = Logger::getInstance();
-    while(!stop){
+    while(true){
         icmplib::PingResult res;
-        res << chan;
+
+        // wait for messages
+        sem_wait(&queueSem);
+        sem_wait(&pushLock); // engage pushLock
+        res = pings.front();
+        pings.pop();
+        sem_post(&pushLock); // disengage pushLock
+        if(stop) return;
 
         // Connection events
         if(res.response!=lastResponse){ // if change in network connection occurs
@@ -43,14 +51,31 @@ void PingTarget::eventHandling() {
             }
         }
         lastResponse = res.response;
-        std::cout << "Ping: " << res.interval << " Response: "<< responseToString(res.response) <<std::endl;
+        std::cout << "Target: " << address
+            << " Ping: " << res.interval
+            << " Response: "<< responseToString(res.response) <<std::endl;
     }
 }
 
 void PingTarget::stopThread() {
+    // first set the stop flag and then increment the queue semaphore to unlock the waiting eventHandler thread
     stop=true;
+    sem_post(&queueSem);
 }
 
 void PingTarget::pushResult(const icmplib::PingResult& result) {
-    result>>chan;
+    sem_wait(&pushLock);
+    pings.push(result);
+    sem_post(&pushLock);
+    sem_post(&queueSem);
 }
+
+std::string PingTarget::getAddress() const{
+    return address;
+}
+
+int PingTarget::getInterval() const {
+    return interval;
+}
+
+

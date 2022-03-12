@@ -18,15 +18,17 @@ void sigint_handler(int signum){
     stop=true;
 }
 
-void continuous_ping(p_chan& out, const std::string& target,const int& interval = 5){
-    icmplib::IPAddress t = icmplib::IPAddress(target);
-    std::cout << "Starting to ping target " << target << " with interval " << interval << std::endl;
+void continuous_ping(PingTarget& target){
+    std::string address = target.getAddress();
+    int interval = target.getInterval();
+    icmplib::IPAddress t = icmplib::IPAddress(address);
+    std::cout << "Starting to ping target " << address << " with interval " << interval << std::endl;
     while (!stop){
         icmplib::PingResult result = icmplib::Ping(t, interval);
-        result >> out;
+        target.pushResult(result);
         sleep(interval);
     }
-    out.close();
+    target.stopThread();
 }
 
 void parseTargets(YAML::Node targetsNode){
@@ -35,8 +37,7 @@ void parseTargets(YAML::Node targetsNode){
         std::string address = it->operator[]("address").as<std::string>();
         int interval = it->operator[]("interval").as<int>();
         int threshold = it->operator[]("pingwarning_threshold").as<int>();
-        // TODO: Fix this error
-//        targets.emplace_back(address,interval,threshold);
+        targets.emplace_back(address,interval,threshold);
         logger->log(LogLevel::logINFO,"Parsed target: " + address, EventType::SetupInformation);
     }
 }
@@ -60,8 +61,10 @@ int main() {
     std::vector<std::thread> threads;
     signal(SIGINT, sigint_handler);
     p_chan pingResults;
-
-    threads.emplace_back(&continuous_ping, std::ref(pingResults), std::ref(target), std::ref(pingInterval));
+    for(PingTarget& t:targets){
+        threads.emplace_back(&continuous_ping, std::ref(t));
+    }
+//    threads.emplace_back(&continuous_ping, std::ref(pingResults), std::ref(target), std::ref(pingInterval));
 //    threads.emplace_back(std::thread(&event_handling, std::ref(pingResults), std::ref(pingWarningThreshold)));
 
     for(std::thread& t: threads){
