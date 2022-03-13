@@ -3,7 +3,7 @@ RUN mkdir -p /app/
 COPY ./ /app/
 WORKDIR /app/
 
-RUN apt-get update && apt-get install -y --no-install-recommends cmake
+RUN apt-get update && apt-get install -y --no-install-recommends cmake gdb ssh rsync libpq-dev postgresql-server-dev-all
 RUN cmake -S . -B build -D CMAKE_BUILD_TYPE=Release
 RUN cmake --build build || :
 RUN ls -a /app/build
