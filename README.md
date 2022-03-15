@@ -7,4 +7,3 @@ that documents events such as network timeouts or high response times.
  - [Channel](https://github.com/andreiavrammsd/cpp-channel) (automatically included via CMakeLists)
  - [yaml-cpp](https://github.com/jbeder/yaml-cpp) (automatically included via CMakeLists)
  - libpq-dev (Install using `sudo apt install libpq-dev`)
- 

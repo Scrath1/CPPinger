@@ -3,10 +3,9 @@ project(CPPinger)
 
 find_package(Threads)
 
-#set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_EXTENSIONS 17)
+set(CMAKE_CXX_STANDARD 17)
 
-add_executable(CPPinger src/main.cpp src/icmplib/icmplib.h src/Logger/Logger.cpp src/Logger/Logger.h src/Logger/LogLevels.h src/DBInterface.cpp src/DBInterface.h)
+add_executable(CPPinger src/main.cpp src/icmplib/icmplib.h src/Logger/Logger.cpp src/Logger/Logger.h src/Logger/LogLevels.h src/DBInterface.cpp src/DBInterface.h src/Events.h)
 
 # add dependencies
 include(cmake/CPM.cmake)
@@ -20,6 +19,14 @@ if(yaml-cpp_ADDED)
 #    add_library(yaml-cpp INTERFACE)
     target_include_directories(yaml-cpp INTERFACE ${yaml-cpp_SOURCE_DIR})
 endif()
+
+CPMAddPackage(
+        Name libpqxx
+        GITHUB_REPOSITORY jtv/libpqxx
+        GIT_TAG origin/master
+        VERSION 7.7.0
+)
+
 CPMAddPackage(
         NAME cpp-channel
         GITHUB_REPOSITORY andreiavrammsd/cpp-channel
@@ -30,18 +37,8 @@ if(cpp-channel_ADDED)
     target_include_directories(cpp-channel INTERFACE ${cpp-channel_SOURCE_DIR})
 endif()
 
-CPMAddPackage(
-        Name libpqxx
-        GITHUB_REPOSITORY jtv/libpqxx
-        GIT_TAG origin/master
-        VERSION 7.7.0
-)
-if(libpqxx_ADDED)
-    add_library(libpqxx INTERFACE)
-    target_include_directories(libpqxx INTERFACE libpqxx_SOURCE_DIR)
-endif()
-
 target_link_libraries( CPPinger
         ${CMAKE_THREAD_LIBS_INIT}
         cpp-channel
-        yaml-cpp)
+        yaml-cpp
+        pqxx)

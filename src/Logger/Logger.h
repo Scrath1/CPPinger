@@ -3,6 +3,7 @@
 #include "LogLevels.h"
 #include <iostream>
 #include <fstream>
+#include "../Events.h"
 
 class Logger {
 public:

@@ -10,12 +10,4 @@ static std::string logLevelToString(LogLevel level){
     return LogLevelStrings[level];
 }
 
-enum EventType {Timeout, High_Ping, SetupInformation ,NoEvent};
-const std::string EventStrings[] = {"Timeout", "High Ping","Setup Information", "NoEvent"};
-
-// has to be static for some reason or the build fails
-static std::string eventToString(EventType event){
-    return EventStrings[event];
-}
-
 #endif //PING_TEST_LOGLEVELS_H
