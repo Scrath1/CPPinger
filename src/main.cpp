@@ -5,10 +5,10 @@
 #include <include/msd/channel.hpp>
 #include "icmplib/icmplib.h"
 #include "Logger/Logger.h"
-#include "DBInterface.h"
+#include "DBInterface/DBInterface.h"
 
 using p_chan = msd::channel<icmplib::PingResult>;
-void event_handling(p_chan& in, int pingWarningThreshold);
+void eventHandling(p_chan& in, int pingWarningThreshold);
 
 const std::string ResponseStrings[] = {"Success","Unreachable","TimeExceeded","Timeout","Unsupported","Failure"};
 
@@ -20,15 +20,21 @@ bool stop = false; // flag to stop the pinger and event handler threads
 // these are later overwritten by the value from the config file
 bool useLogger = false;
 bool useDatabase = false;
+/// determines how much information is written to the command line.
+/// 0 = Only control information
+/// 1 = control information + detected events
+/// 2 = control information + detected events + ping responses
 int pingerVerbosity = 1;
 DBInterface* db;
 
-void sigint_handler(int signum){
+void sigintHandler(int signum){
     std::cout << "Stopping..." << std::endl;
     stop=true;
 }
 
-void event_handling(p_chan& in, int pingWarningThreshold){
+/// Continuously reads incoming pingResults from the in parameter and reacts to detected events.
+/// To stop this function set the global stop variable to true
+void eventHandling(p_chan& in, int pingWarningThreshold){
     bool pingWarningDetected = false; // flag to determine the flank when the ping goes above/below the threshold
     icmplib::PingResponseType lastResponse = icmplib::PingResponseType::Success;
 
@@ -70,7 +76,9 @@ void event_handling(p_chan& in, int pingWarningThreshold){
     }
 }
 
-void continuous_ping(p_chan& out, const std::string& target,const int& interval = 5){
+/// Continuously pings the given target and sends the results to an eventHandler using the out parameter.
+/// To stop this function set the global stop variable to true.
+void continuousPing(p_chan& out, const std::string& target, const int& interval = 5){
     icmplib::IPAddress t = icmplib::IPAddress(target);
     if(pingerVerbosity>0) std::cout << "Starting to ping target " << target << " with interval " << interval << std::endl;
     while (!stop){
@@ -81,6 +89,7 @@ void continuous_ping(p_chan& out, const std::string& target,const int& interval 
     out.close();
 }
 
+/// Concatenate the connection string required by the database based on the given settings
 std::string getConnectionString(YAML::Node configNode){
 //    All option for connection string listed here https://www.postgresql.org/docs/9.5/libpq-connect.html#LIBPQ-PARAMKEYWORDS
     YAML::Node dbNode = configNode["database"];
@@ -130,13 +139,13 @@ int main() {
 
     std::vector<std::thread> threads;
     // configure handler for ctrl+c
-    signal(SIGINT, sigint_handler);
+    signal(SIGINT, sigintHandler);
 
     // channel to send information between pinger and event handler
     p_chan pingResults;
 
-    threads.emplace_back(&continuous_ping, std::ref(pingResults), std::ref(target), std::ref(pingInterval));
-    threads.emplace_back(std::thread(&event_handling, std::ref(pingResults), std::ref(pingWarningThreshold)));
+    threads.emplace_back(&continuousPing, std::ref(pingResults), std::ref(target), std::ref(pingInterval));
+    threads.emplace_back(std::thread(&eventHandling, std::ref(pingResults), std::ref(pingWarningThreshold)));
 
     for(std::thread& t: threads){
         t.join();

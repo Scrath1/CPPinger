@@ -1,7 +1,7 @@
 #ifndef CPPINGER_DBINTERFACE_H
 #define CPPINGER_DBINTERFACE_H
-#include <pqxx/pqxx>
-#include "Events.h"
+#include "pqxx/pqxx"
+#include "../Events.h"
 class DBInterface {
 public:
     explicit DBInterface(const std::string& connectionString);
