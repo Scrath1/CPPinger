@@ -6,6 +6,7 @@
 #include "icmplib/icmplib.h"
 #include "Logger/Logger.h"
 #include "DBInterface/DBInterface.h"
+#include "EventFunctions.h"
 
 using p_chan = msd::channel<icmplib::PingResult>;
 void eventHandling(p_chan& in, int pingWarningThreshold);
@@ -20,7 +21,7 @@ bool stop = false; // flag to stop the pinger and event handler threads
 // these are later overwritten by the value from the config file
 bool useLogger = false;
 bool useDatabase = false;
-/// determines how much information is written to the command line.
+/// Determines how much information is written to the command line.
 /// 0 = Only control information
 /// 1 = control information + detected events
 /// 2 = control information + detected events + ping responses
@@ -44,31 +45,23 @@ void eventHandling(p_chan& in, int pingWarningThreshold){
         res << in;
 
         // Connection events
-//        TODO: add event output to console for verbosity > 0
         if(res.response!=lastResponse){ // if change in network connection occurs
             if(lastResponse==icmplib::PingResponseType::Success){ // connection lost
-                const std::string eD = "Lost connection";
-                if(useLogger) logger->log(LogLevel::logINFO, eD, EventType::Timeout);
-                if(useDatabase) db->insertEvent(eD, EventType::Timeout);
+                connectionLost(db, logger);
             }
             else if (res.response==icmplib::PingResponseType::Success){ // reconnected
-                const std::string eD = "Reconnected";
-                if(useLogger) logger->log(LogLevel::logINFO, "Reconnected", EventType::Timeout);
-                if(useDatabase) db->insertEvent(eD, EventType::Timeout);
+                reconnected(db, logger);
             }
         }
 
         // Ping events
         if(res.response==icmplib::PingResponseType::Success) {
             if (res.interval > pingWarningThreshold && !pingWarningDetected) { // ping went above the threshold
-                const std::string eD = "Ping exceeded warning treshold";
-                if(useLogger) logger->log(LogLevel::logINFO, eD, EventType::High_Ping);
-                if(useDatabase) db->insertEvent(eD, EventType::High_Ping);
+                pingAboveThreshold(db, logger);
                 pingWarningDetected = true;
             } else if (res.interval < pingWarningThreshold && pingWarningDetected) { // ping went back below the threshold
-                const std::string eD = "Ping went back to normal";
-                if(useLogger) logger->log(LogLevel::logINFO, eD, EventType::High_Ping);
-                if(useDatabase) db->insertEvent(eD, EventType::High_Ping);
+                pingBelowThreshold(db, logger);
+                pingWarningDetected = false;
             }
         }
         lastResponse = res.response;

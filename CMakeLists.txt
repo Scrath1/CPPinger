@@ -5,7 +5,7 @@ find_package(Threads)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(CPPinger src/main.cpp src/icmplib/icmplib.h src/Logger/Logger.cpp src/Logger/Logger.h src/Logger/LogLevels.h src/DBInterface/DBInterface.cpp src/DBInterface/DBInterface.h src/Events.h)
+add_executable(CPPinger src/main.cpp src/icmplib/icmplib.h src/Logger/Logger.cpp src/Logger/Logger.h src/Logger/LogLevels.h src/DBInterface/DBInterface.cpp src/DBInterface/DBInterface.h src/Events.h src/EventFunctions.h)
 
 # add dependencies
 include(cmake/CPM.cmake)

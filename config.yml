@@ -2,7 +2,7 @@ pinger:
   interval: 2
   target: 192.168.1.1
   pingwarning_threshold: 75
-  verbosity: 1
+  verbosity: 2
 logger:
   use_logger: true
   logfile_name: "logfile.log"
