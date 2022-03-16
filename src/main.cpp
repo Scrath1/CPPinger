@@ -114,9 +114,8 @@ int main() {
     std::string logfileName;
     if(useLogger){
         logfileName = config["logger"]["logfile_name"].as<std::string>();
+        Logger::setFileTarget(logfileName);
     }
-    Logger::setFileTarget(logfileName);
-    Logger* logger = Logger::getInstance();
 
 //  db config and setup
     useDatabase = config["database"]["use_database"].as<bool>();
@@ -135,7 +134,7 @@ int main() {
         }
     }
 
-    if(useLogger) logger->log(LogLevel::logINFO, "Started logging");
+    if(useLogger) Logger::getInstance()->log(LogLevel::logINFO, "Started logging");
 
     std::vector<std::thread> threads;
     // configure handler for ctrl+c

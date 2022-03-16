@@ -43,3 +43,46 @@ database:
 |          | dbname               | any string       | The database name used when connecting to the database. Make sure this is the same as the one used in the docker-compose.yml.                                    |
 |          | user                 | any string       | The username used when connecting to the database. Make sure this is the same as the one used in the docker-compose.yml                                          |
 |          | password             | any string       | The password used when connecting to the database. Make sure this is the same as the one used in the docker-compose.yml                                          |
+
+## Multiple Ping Targets
+If you want to monitor your connection to multiple hosts you can add additional cppinger containers in the `docker-compose.yml`.
+
+### Example:
+In this example we have 2 pinger containers each with their own config file located in the config directory.
+cppinger1 uses the pinger1.yml and cppinger2 uses the pinger2.yml file.
+
+If you don't need a logfile you can disable the logger in the containers config file and leave out the logs volume mapping.
+```yaml
+version: '3'
+services:
+  cppinger1:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - ./config/pinger1.yml:/app/config/config.yml
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  cppinger2:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - ./config/pinger2.yml:/app/config/config.yml
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg14
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./timescale-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    environment:
+      TIMESCALEDB_TELEMETRY: 'off'
+      POSTGRES_USER: cppinger
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: cppinger
+```
