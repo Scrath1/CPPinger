@@ -1,0 +1,23 @@
+version: '3'
+services:
+  cppinger:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - ./config/dockerExampleConfig.yml:/app/config/config.yml
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg14
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./timescale-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    environment:
+      TIMESCALEDB_TELEMETRY: 'off'
+      POSTGRES_USER: cppinger
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: cppinger

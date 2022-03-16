@@ -3,17 +3,11 @@
 #include <string>
 
 enum LogLevel {logERROR, logWARNING, logINFO};
-static const std::string LogLevelStrings[] = {"Error", "Warning", "Info"};
+const std::string LogLevelStrings[] = {"Error", "Warning", "Info"};
 
+// has to be static for some reason or the build fails
 static std::string logLevelToString(LogLevel level){
     return LogLevelStrings[level];
-}
-
-enum EventType {Timeout, High_Ping, NoEvent};
-static const std::string EventStrings[] = {"Timeout", "High Ping", "NoEvent"};
-
-static std::string eventToString(EventType event){
-    return EventStrings[event];
 }
 
 #endif //PING_TEST_LOGLEVELS_H

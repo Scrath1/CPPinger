@@ -7,3 +7,7 @@ Makefile
 _deps/
 Ping_test
 *.log
+timescale-data/*
+config/*.yml
+!config/localExampleConfig.yml
+!config/dockerExampleConfig.yml
