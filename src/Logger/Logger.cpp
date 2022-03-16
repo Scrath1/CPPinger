@@ -6,10 +6,11 @@ Logger* Logger::instance = nullptr;
 std::string Logger::filename;
 
 Logger::Logger() {
+    const std::string folder = "logs/";
     if(filename.empty()){
         filename = "Log.log";
     }
-    logfileStream.open(filename, std::ofstream::out);
+    logfileStream.open(folder+filename, std::ofstream::out);
 }
 
 Logger* Logger::getInstance() {

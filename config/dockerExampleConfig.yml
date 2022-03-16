@@ -1,0 +1,15 @@
+pinger:
+  interval: 2
+  target: 192.168.1.1
+  pingwarning_threshold: 75
+  verbosity: 2
+logger:
+  use_logger: true
+  logfile_name: "logfile.log"
+database:
+  use_database: true
+  host: timescaledb
+  port: 5432
+  dbname: cppinger
+  user: cppinger
+  password: example

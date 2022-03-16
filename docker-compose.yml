@@ -5,8 +5,8 @@ services:
       context: ./
       dockerfile: Dockerfile
     volumes:
-      - ./config.yml:/config.yml
-      - ./logfile.log:/logfile.log
+      - ./config/dockerExampleConfig.yml:/app/config/config.yml
+      - ./logs:/app/logs
     restart: unless-stopped
 
   timescaledb:

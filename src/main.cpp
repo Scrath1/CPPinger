@@ -96,10 +96,10 @@ std::string getConnectionString(YAML::Node configNode){
 int main() {
     YAML::Node config;
     try{
-        config = YAML::LoadFile("config.yml");
+        config = YAML::LoadFile("config/config.yml");
     }
     catch(YAML::BadFile& e){
-        std::cerr << "Could not load config file. Make sure that the config.yml is located in the current working directory" << std::endl;
+        std::cerr << "Could not load config file. Make sure that the config.yml is located in the config folder of the current working directory" << std::endl;
         return 1;
     }
 
@@ -129,7 +129,7 @@ int main() {
             db->setDefaultAddress(target);
         }
         catch(pqxx::broken_connection& e){
-            std::cerr << "Invalid connection. Confirm your hostname, username and password are correct." << std::endl;
+            std::cerr << e.what() << std::endl;
             delete db;
             return 1;
         }
@@ -147,8 +147,8 @@ int main() {
     threads.emplace_back(&continuousPing, std::ref(pingResults), std::ref(target), std::ref(pingInterval));
     threads.emplace_back(std::thread(&eventHandling, std::ref(pingResults), std::ref(pingWarningThreshold)));
 
-    for(std::thread& t: threads){
-        t.join();
+    for(std::thread& th: threads){
+        th.join();
     }
     db->closeConnection();
     delete db;
