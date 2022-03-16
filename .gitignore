@@ -7,3 +7,4 @@ Makefile
 _deps/
 Ping_test
 *.log
+timescale-data/*

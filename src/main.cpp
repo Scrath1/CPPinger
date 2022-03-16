@@ -94,7 +94,14 @@ std::string getConnectionString(YAML::Node configNode){
 }
 
 int main() {
-    YAML::Node config = YAML::LoadFile("config.yml");
+    YAML::Node config;
+    try{
+        config = YAML::LoadFile("config.yml");
+    }
+    catch(YAML::BadFile& e){
+        std::cerr << "Could not load config file. Make sure that the config.yml is located in the current working directory" << std::endl;
+        return 1;
+    }
 
 //    pinger config
     int pingInterval = config["pinger"]["interval"].as<int>();
